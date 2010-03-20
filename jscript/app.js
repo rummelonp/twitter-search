@@ -5,32 +5,37 @@ Import("System.Net.WebClient");
 Import("System.Uri");
 Import("System.Runtime.Serialization.Json");
 
-
 // ライブラリ
-var Class = {
-  create: function(parent, properties){
+
+var $break = {};
+
+var Class = function() {
+  var extend = function(klass, properties) {
+    for (var p in properties) {
+      klass[p] = properties[p];
+    };
+    return klass;
+  };
+  var create = function(parent, properties){
     var klass = function(){
       this.initialize.apply(this, arguments);
     };
     if (typeof parent === "function") {
       klass.prototype = new parent;
     };
-    Object.extend(klass.prototype, properties);
+    extend(klass.prototype, properties);
     if (!klass.prototype.initialize) {
       klass.prototype.initialize = function(){};
     };
     return klass;
-  }
-};
-
-Object.extend = function(klass, properties) {
-  for (var p in properties) {
-    klass[p] = properties[p];
   };
-  return klass;
-};
+  return {
+    create: create,
+    extend: extend
+  };
+}();
 
-Object.extend(Array.prototype, function() {
+Class.extend(Array.prototype, function() {
   var each = function(iterator) {
     try {
       for (var i = 0; i < this.length; i += 1) {
@@ -40,24 +45,32 @@ Object.extend(Array.prototype, function() {
       if (e !== $break) { throw e; };
     };
   };
-  
+  var select = function(iterator) {
+    var r = [];
+    try {
+      for (var i = 0; i < this.length; i += 1) {
+        if (iterator(this[i], i)) {
+          r.push(this[i]);
+        };
+      };
+    } catch (e) {
+      if (e !== $break) { throw e; };
+    };
+  };
+  var collect = function(iterator) {
+    var r = [];
+    try {
+      for (var i = 0; i < this.length; i += 1) {
+          r.push(iterator(this[i], i));
+      };
+    } catch (e) {
+      if (e !== $break) { throw e; };
+    };
+  };
   return {
     each: each
   };
 }());
-
-Object.extend(String.prototype, function() {
-  var toInt = function(radix) {
-    var n = parseInt(this, radix || 10);
-    return isNaN(n)? '': n;
-  };
-   
-  return {
-    toInt: toInt
-  }
-}());
-
-var $break = {};
 
 // アプリケーション
 var App = Class.create(null, function() {
@@ -103,8 +116,7 @@ var App = Class.create(null, function() {
       var textBlock = new TextBlock();
       textBlock.Text = tweet.text;
       textBlock.FontSize = "16";
-      textBlock.
-      root.stackPanel.Children.Add(textBlock);
+      root.contentPanel.Children.Add(textBlock);
     });
   };
   

@@ -7,7 +7,8 @@ body {
   margin: 0;
 }
 #silverlightControlHost {
-  height: 100%;
+  height: 99%;
+  width: 99%;
 }
 #errorLocation {
   font-size: small;

@@ -6,6 +6,7 @@
     
     <Grid.RowDefinitions>
       <RowDefinition Height="20px" />
+      <RowDefinition Height="60px" />
       <RowDefinition />
       <RowDefinition Height="20px" />
     </Grid.RowDefinitions>
@@ -16,10 +17,24 @@
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
     
-    <StackPanel x:Name="stackPanel" Grid.Row="1" Grid.Column="1">
+    <StackPanel Grid.Row="1" Grid.Column="1">
       <TextBox x:Name="searchText" Text="入力してね" FontSize="16" />
       <Button x:Name="searchButton" Content="Twitterで検索する" FontSize="16" />
     </StackPanel>
+    
+    <ScrollViewer HorizontalScrollBarVisibility="Auto"  Grid.Row="2" Grid.Column="1">
+      <StackPanel x:Name="contentPanel">
+      </StackPanel>
+    </ScrollViewer>
+    
+    <!--
+    <ScrollViewer x:Name="contentView" HorizontalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1">
+      <TextBox x:Name="searchText" Text="入力してね" FontSize="16" />
+      <Button x:Name="searchButton" Content="Twitterで検索する" FontSize="16" />
+      <StackPanel x:Name="stackPanel">
+      </StackPanel>
+    </ScrollViewer>
+    -->
     
   </Grid>
 
