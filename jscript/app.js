@@ -101,8 +101,6 @@ var App = Class.create(null, function() {
     var client = new WebClient();
     client.DownloadStringCompleted += displayResult;
     client.DownloadStringAsync(url);
-    //client.OpenReadCompleted += displayResult;    
-    //client.OpenReadAsync(url);
   };
   
   var displayResult = function(s, e) {
@@ -116,7 +114,8 @@ var App = Class.create(null, function() {
       var textBlock = new TextBlock();
       textBlock.Text = tweet.text;
       textBlock.FontSize = "16";
-      root.contentPanel.Children.Add(textBlock);
+      textBlock.TextWrapping = 'Wrap';
+      root.contentList.Items.Add(textBlock);
     });
   };
   
