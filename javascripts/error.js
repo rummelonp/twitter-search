@@ -1,4 +1,4 @@
-function onSilverlightError(sender, args) {
+var onSilverlightError = function(sender, args) {
     var appSource = "";
     if (sender != null && sender != 0) {
         appSource = sender.getHost().Source;

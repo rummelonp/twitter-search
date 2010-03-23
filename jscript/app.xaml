@@ -23,8 +23,8 @@
     </StackPanel>
     
     <ListBox x:Name="contentList"
-      Grid.Row="2" Grid.Column="1"
-      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+      Grid.Row="2" Grid.Column="1">
     </ListBox>
     
   </Grid>
