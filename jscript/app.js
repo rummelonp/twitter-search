@@ -154,7 +154,9 @@ var App = Class.create(null, function() {
     if (text === defaultText) {
       return false;
     };
-    searchTexts.push(text);
+    if (!searchTexts.include(text)) {
+      searchTexts.push(text);
+    };
     search(text);
   };
   
@@ -170,7 +172,9 @@ var App = Class.create(null, function() {
   var display = function(s, e) {
     try {
       var responseJson = eval('(' + e.Result + ')');
-    } catch (e) { return; };
+    } catch (e) {
+      return false;
+    };
     var selected = root.contentList.SelectedIndex;    
     tweets = tweets.concat(responseJson.results.collect(function(tweet) {
       var xaml = '' +
@@ -187,7 +191,8 @@ var App = Class.create(null, function() {
         '    Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" />' +
         '  <HyperlinkButton Content="' + tweet.from_user + '" NavigateUri="http://twitter.com/' + tweet.from_user + '"' +
         '    FontSize="16" TargetName="_blank" Grid.Row="0" Grid.Column="1" />' +
-        '  <TextBlock Text="' + tweet.text + '" FontSize="16" TextWrapping="Wrap" Grid.Row="1" Grid.Column="1" />' +
+        '  <TextBlock Text="' + tweet.text + '" FontSize="16" TextWrapping="Wrap"' +
+        '    Grid.Row="1" Grid.Column="1" />' +
         '</Grid>' +
       '';
       var grid = XamlReader.Load(xaml);
