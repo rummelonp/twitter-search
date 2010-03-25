@@ -50,6 +50,30 @@ var Class = function() {
   };
 }();
 
+Class.extend(String.prototype, function() {
+  var toDate = function() {
+    return new Date(this.replace(/\+/gi, 'UTC+'));
+  };
+  return {
+    toDate: toDate
+  };
+}());
+
+Class.extend(Date.prototype, function() {
+  var format = function() {
+    var d = this;
+    return this.getFullYear() + '年' + (this.getMonth() + 1) + '月' + this.getDate() + '日 ' +
+      ((this.getMinutes() <= 14)?
+         (this.getHours() + '時くらい'):
+       (this.getMinutes() >= 45)?
+         ((this.getHours() + 1) + '時くらい'):
+           (this.getHours() + '時30分くらい'));
+  };
+  return {
+    format: format
+  };
+}());
+
 Class.extend(Array.prototype, function() {
   var each = function(iterator) {
     try {
@@ -123,7 +147,7 @@ Class.extend(Array.prototype, function() {
 // Application
 var App = Class.create(null, function() {
   
-  var root = null, defaultText = '', searchTexts = [], tweets = [];
+  var root = null, defaultText = '', searchHistries = [], tweets = [];
   
   var initialize = function() {
     root = Application.Current.LoadRootVisual(new UserControl(), "app.xaml");
@@ -139,7 +163,7 @@ var App = Class.create(null, function() {
       };
     };
     root.searchButton.Click += clickSearch;
-    $('hiddenButton').AttachEvent('click', new EventHandler(autoSearch));
+    $('autoSearchButton').AttachEvent('click', new EventHandler(autoSearch));
   };
   
   var search = function(text) {
@@ -154,17 +178,23 @@ var App = Class.create(null, function() {
     if (text === defaultText) {
       return false;
     };
-    if (!searchTexts.include(text)) {
-      searchTexts.push(text);
+    if (!searchHistries.include(text)) {
+      searchHistries.push(text);
+      var hyperlinkButton = new HyperlinkButton();
+      hyperlinkButton.Content = text;
+      hyperlinkButton.NavigateUri = new Uri('http://twitter.com/#search?q=' + HttpUtility.UrlEncode(text));
+      hyperlinkButton.FontSize = 16;
+      hyperlinkButton.TargetName = "_blank";
+      root.searchHistries.Children.Add(hyperlinkButton);
     };
     search(text);
   };
   
   var autoSearch = function(s, e) {
-    if (searchTexts.length == 0) {
+    if (searchHistries.length == 0) {
       return false;
     };
-    searchTexts.each(function(text) {
+    searchHistries.slice(1, 3).each(function(text) {
       search(text);
     });
   };
@@ -182,17 +212,25 @@ var App = Class.create(null, function() {
         '  <Grid.ColumnDefinitions>' +
         '    <ColumnDefinition Width="60px" />' +
         '    <ColumnDefinition Width="*" />' +
+        '    <ColumnDefinition Width="*" />' +
         '  </Grid.ColumnDefinitions>' +
         '  <Grid.RowDefinitions>' +
         '    <RowDefinition />' +
         '    <RowDefinition />' +
+        '    <RowDefinition />' +
         '  </Grid.RowDefinitions>' +
-        '  <Image Source="' + tweet.profile_image_url + '" Height="50" VerticalAlignment="Top"' +
-        '    Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" />' +
-        '  <HyperlinkButton Content="' + tweet.from_user + '" NavigateUri="http://twitter.com/' + tweet.from_user + '"' +
+        '  <HyperlinkButton NavigateUri="http://twitter.com/' + tweet.from_user + '"' +
+        '    TargetName="_blank" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3">' +
+        '    <Image Source="' + tweet.profile_image_url + '" Height="50" VerticalAlignment="Top"/>' +
+        '  </HyperlinkButton>' +
+        '  <HyperlinkButton Content="' + tweet.from_user + '"' + 
+        '    NavigateUri="http://twitter.com/' + tweet.from_user + '"' +
         '    FontSize="16" TargetName="_blank" Grid.Row="0" Grid.Column="1" />' +
         '  <TextBlock Text="' + tweet.text + '" FontSize="16" TextWrapping="Wrap"' +
-        '    Grid.Row="1" Grid.Column="1" />' +
+        '    Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"/>' +
+        '  <HyperlinkButton Content="' + tweet.created_at.toDate().format() + '"' +
+        '    NavigateUri="http://twitter.com/' + tweet.from_user + '/status/' + tweet.id + '"' +
+        '    FontSize="12" TargetName="_blank" Grid.Row="3" Grid.Column="1" />' +
         '</Grid>' +
       '';
       var grid = XamlReader.Load(xaml);
@@ -202,7 +240,7 @@ var App = Class.create(null, function() {
     }).sortBy(function(tweet) {
       return tweet.id;
     }).reverse();
-    root.contentList.ItemsSource = tweets.pluck('content');
+    root.contentList.ItemsSource = tweets.pluck('content').slice(1, 100);
     root.contentList.SelectedIndex = selected;
   };
   
