@@ -169,43 +169,52 @@ var App = Class.create(null, function() {
   var search = function(text) {
     var url = new Uri('http://search.twitter.com/search.json?q=' + HttpUtility.UrlEncode(text) + '&rpp=20&lang=ja');
     var client = new WebClient();
-    client.DownloadStringCompleted += display;
+    client.DownloadStringCompleted += addTweets;
     client.DownloadStringAsync(url);
   };
 
   var clickSearch = function(s, e) {
     var text = root.searchText.Text;
-    if (text === defaultText) {
+    if (text == defaultText || text.length == 0) {
       return false;
     };
-    if (!searchHistries.include(text)) {
-      searchHistries.push(text);
+    addHistory(text);
+    search(text);
+  };
+  
+  var autoSearch = function(s, e) {
+    HtmlPage.Document.Window.Alert(s);
+    if (searchHistries.length == 0) {
+      return false;
+    };
+    searchHistries.slice(1, 3).pluck('text').each(function(text) {
+      search(text);
+    });
+  };
+  
+  var addHistory = function(text) {
+    if (searchHistries.include(text)) {
+    } else {
       var hyperlinkButton = new HyperlinkButton();
       hyperlinkButton.Content = text;
       hyperlinkButton.NavigateUri = new Uri('http://twitter.com/#search?q=' + HttpUtility.UrlEncode(text));
       hyperlinkButton.FontSize = 16;
       hyperlinkButton.TargetName = "_blank";
+      searchHistries.push({
+        text: text,
+        content: hyperlinkButton
+      });
       root.searchHistries.Children.Add(hyperlinkButton);
     };
-    search(text);
   };
   
-  var autoSearch = function(s, e) {
-    if (searchHistries.length == 0) {
-      return false;
-    };
-    searchHistries.slice(1, 3).each(function(text) {
-      search(text);
-    });
-  };
-  
-  var display = function(s, e) {
+  var addTweets = function(s, e) {
     try {
       var responseJson = eval('(' + e.Result + ')');
     } catch (e) {
       return false;
     };
-    var selected = root.contentList.SelectedIndex;    
+    var selected = root.contentList.SelectedIndex;
     tweets = tweets.concat(responseJson.results.collect(function(tweet) {
       var xaml = '' +
         '<Grid xmlns="http://schemas.microsoft.com/client/2007" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">' +
@@ -234,7 +243,10 @@ var App = Class.create(null, function() {
         '</Grid>' +
       '';
       var grid = XamlReader.Load(xaml);
-      return {id: parseInt(tweet.id, 10), content:grid};
+      return {
+        id: parseInt(tweet.id, 10),
+        content: grid
+      };
     })).uniq(function(tweet) {
       return tweet.id;
     }).sortBy(function(tweet) {
