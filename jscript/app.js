@@ -183,27 +183,22 @@ var App = Class.create(null, function() {
   };
   
   var autoSearch = function(s, e) {
-    HtmlPage.Document.Window.Alert(s);
     if (searchHistries.length == 0) {
       return false;
     };
-    searchHistries.slice(1, 3).pluck('text').each(function(text) {
+    searchHistries.slice(1, 3).each(function(text) {
       search(text);
     });
   };
   
   var addHistory = function(text) {
-    if (searchHistries.include(text)) {
-    } else {
+    if (!searchHistries.include(text)) {
       var hyperlinkButton = new HyperlinkButton();
       hyperlinkButton.Content = text;
       hyperlinkButton.NavigateUri = new Uri('http://twitter.com/#search?q=' + HttpUtility.UrlEncode(text));
       hyperlinkButton.FontSize = 16;
       hyperlinkButton.TargetName = "_blank";
-      searchHistries.push({
-        text: text,
-        content: hyperlinkButton
-      });
+      searchHistries.push(text);
       root.searchHistries.Children.Add(hyperlinkButton);
     };
   };
