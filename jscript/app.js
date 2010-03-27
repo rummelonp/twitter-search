@@ -74,6 +74,19 @@ Class.extend(Date.prototype, function() {
   };
 }());
 
+Class.extend(Array, function() {
+  var from = function(_args) {
+    var args = [];
+    for (var i = 0; i < _args.length; i += 1) {
+      args.push(_args[i]);
+    };
+    return args;
+  };
+  return {
+    from: from
+  };
+}());
+
 Class.extend(Array.prototype, function() {
   var each = function(iterator) {
     try {
