@@ -62,12 +62,12 @@ Class.extend(String.prototype, function() {
 Class.extend(Date.prototype, function() {
   var format = function() {
     var d = this;
-    return this.getFullYear() + '年' + (this.getMonth() + 1) + '月' + this.getDate() + '日 ' +
-      ((this.getMinutes() <= 14)?
-         (this.getHours() + '時くらい'):
-       (this.getMinutes() >= 45)?
-         ((this.getHours() + 1) + '時くらい'):
-           (this.getHours() + '時30分くらい'));
+    return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' +
+      ((d.getMinutes() <= 14)?
+         (d.getHours() + '時くらい'):
+       (d.getMinutes() >= 45)?
+         ((d.getHours() + 1) + '時くらい'):
+           (d.getHours() + '時30分くらい'));
   };
   return {
     format: format
@@ -180,7 +180,8 @@ var App = Class.create(null, function() {
   };
   
   var search = function(text) {
-    var url = new Uri('http://search.twitter.com/search.json?q=' + HttpUtility.UrlEncode(text) + '&rpp=20&lang=ja');
+    var url = new Uri('http://search.twitter.com/search.json?rpp=20&lang=ja&q=' +
+      HttpUtility.UrlEncode(text));
     var client = new WebClient();
     client.DownloadStringCompleted += addTweets;
     client.DownloadStringAsync(url);
@@ -199,16 +200,17 @@ var App = Class.create(null, function() {
     if (searchHistries.length == 0) {
       return false;
     };
-    searchHistries.slice(1, 3).each(function(text) {
+    searchHistries.reverse().slice(0, 3).each(function(text) {
       search(text);
     });
   };
   
   var addHistory = function(text) {
     if (!searchHistries.include(text)) {
+      var url = new Uri('http://twitter.com/#search?q=' + HttpUtility.UrlEncode(text));
       var hyperlinkButton = new HyperlinkButton();
       hyperlinkButton.Content = text;
-      hyperlinkButton.NavigateUri = new Uri('http://twitter.com/#search?q=' + HttpUtility.UrlEncode(text));
+      hyperlinkButton.NavigateUri = url;
       hyperlinkButton.FontSize = 16;
       hyperlinkButton.TargetName = "_blank";
       searchHistries.push(text);
@@ -225,7 +227,8 @@ var App = Class.create(null, function() {
     var selected = root.contentList.SelectedIndex;
     tweets = tweets.concat(responseJson.results.collect(function(tweet) {
       var xaml = '' +
-        '<Grid xmlns="http://schemas.microsoft.com/client/2007" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">' +
+        '<Grid xmlns="http://schemas.microsoft.com/client/2007"' +
+        '  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">' +
         '  <Grid.ColumnDefinitions>' +
         '    <ColumnDefinition Width="60px" />' +
         '    <ColumnDefinition Width="*" />' +
@@ -238,7 +241,8 @@ var App = Class.create(null, function() {
         '  </Grid.RowDefinitions>' +
         '  <HyperlinkButton NavigateUri="http://twitter.com/' + tweet.from_user + '"' +
         '    TargetName="_blank" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3">' +
-        '    <Image Source="' + tweet.profile_image_url + '" Height="50" VerticalAlignment="Top"/>' +
+        '    <Image Source="' + tweet.profile_image_url + '"' + 
+        '      Height="50" VerticalAlignment="Top"/>' +
         '  </HyperlinkButton>' +
         '  <HyperlinkButton Content="' + tweet.from_user + '"' + 
         '    NavigateUri="http://twitter.com/' + tweet.from_user + '"' +
